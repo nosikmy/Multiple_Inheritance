@@ -1,0 +1,24 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    implementation 'cglib:cglib:3.3.0'
+}
+
+tasks.withType(JavaExec) {
+    jvmArgs(['--add-opens', 'java.base/java.lang=ALL-UNNAMED'])
+}
+
+test {
+    useJUnitPlatform()
+}
