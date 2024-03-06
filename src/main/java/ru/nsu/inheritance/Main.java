@@ -19,12 +19,14 @@ public class Main {
         }
     }
 
+    @Extends({RootClass.class})
     static class A extends RootClass {
         @Override
         public void say() {
             System.out.println("A");
         }
     }
+    @Extends({RootClass.class})
     static class B extends RootClass {
         @Override
         public void say() {
