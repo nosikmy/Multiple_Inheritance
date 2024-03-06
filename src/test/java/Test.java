@@ -1,6 +1,7 @@
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
+import ru.nsu.inheritance.Extends;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
