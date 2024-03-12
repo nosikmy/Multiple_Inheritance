@@ -5,7 +5,7 @@ import ru.nsu.inheritance.examples.IRoot;
 import java.lang.reflect.InvocationTargetException;
 
 public class Main {
-    public static void main(String[] args) throws InvocationTargetException, IllegalAccessException {
+    public static void main(String[] args) {
 //        RootInterfaceClass rootInterfaceClass = new RootInterfaceClass("ru.nsu.inheritance.examples");
         E e = CallNextMethodGenerator.create(E.class);
         e.say();
