@@ -4,5 +4,6 @@ import ru.nsu.inheritance.RootInterface;
 
 @RootInterface
 public interface IRoot {
-    int say(int i);
+    int a(int i);
+    int b(int i);
 }

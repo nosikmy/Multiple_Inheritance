@@ -11,6 +11,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +32,22 @@ public class MultipleInheritancer implements MethodInterceptor {
         rootInterface = interfaze;
 
         Enhancer enhancer = new Enhancer();
+        // если класс абстрактный - реализовать
+        if (Modifier.isAbstract(clazz.getModifiers())) {
+            for (Method method : clazz.getMethods()) {
+                if (method.getAnnotation(Override.class) != null) {
+                    System.out.println(method.getName());
+                }
+            }
+//            List<Method> methods = Arrays.stream(clazz.getMethods()).filter(method ->
+//                    Arrays.stream(Object.class.getMethods()).noneMatch(oMethod -> oMethod.equals(method))).toList();
+//            for (Method method : methods) {
+//                System.out.println(method);
+//                if (method.getAnnotation(Override.class) != null) {
+//                    System.out.println(method.getName());
+//                }
+//            }
+        }
         enhancer.setSuperclass(clazz);
         enhancer.setCallback(new MultipleInheritancer());
         return (T) enhancer.create();
@@ -40,7 +57,8 @@ public class MultipleInheritancer implements MethodInterceptor {
     @Override
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
         callNextMethod(obj, method, args);
-
+        // если возвращает значение - вернуть первое встречное
+        // иначе обходить всё дерево (надо изменить порядок наоборот вызова методов)
         Object[] returningValues = null;
         int counter = 0;
 //        return proxy.invokeSuper(obj, args);
@@ -67,10 +85,10 @@ public class MultipleInheritancer implements MethodInterceptor {
             }
             resultingQueue = new ArrayDeque<>();
         }
-        if (counter > 0) {
-            // как-то вернуть в виде object'a массив object'ов
-            return returningValues;
-        }
+//        if (counter > 0) {
+//            // как-то вернуть в виде object'a массив object'ов
+//            return returningValues;
+//        }
         return null;
     }
 
