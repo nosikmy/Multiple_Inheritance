@@ -2,58 +2,61 @@ package ru.nsu.inheritance;
 
 import ru.nsu.inheritance.examples.IRoot;
 
-import java.lang.reflect.InvocationTargetException;
-
 public class Main {
     public static void main(String[] args) {
-//        RootInterfaceClass rootInterfaceClass = new RootInterfaceClass("ru.nsu.inheritance.examples");
-        E e = CallNextMethodGenerator.create(E.class);
-        e.say();
+        E e = MultipleInheritancer.create(E.class, "ru.nsu.inheritance.examples");
+        Object obj = e.say(1);
+
     }
 
-    static class RootClass implements IRoot {
+//    static class RootClass implements IRoot {
+//        @Override
+//        public void say(int i) {
+//            System.out.println("Root" + i);
+//        }
+//    }
 
+//    @Extends({RootClass.class})
+    static class A implements IRoot {
         @Override
-        public void say() {
-            System.out.println("Root");
+        public int say(int i) {
+            System.out.println("A" + i);
+            return i;
         }
     }
-
-    @Extends({RootClass.class})
-    static class A extends RootClass {
+//    @Extends({RootClass.class})
+    static class B implements IRoot {
         @Override
-        public void say() {
-            System.out.println("A");
-        }
-    }
-    @Extends({RootClass.class})
-    static class B extends RootClass {
-        @Override
-        public void say() {
-            System.out.println("B");
+        public int say(int i) {
+            System.out.println("B" + i);
+            return i;
         }
     }
     @Extends({A.class})
-    static class C extends RootClass {
+    static class C implements IRoot {
         @Override
-        public void say() {
-            System.out.println("C");
+        public int say(int i) {
+            System.out.println("C" + i);
+            return i;
         }
     }
 
     @Extends({A.class})
-    static class D extends RootClass {
+    static class D implements IRoot {
         @Override
-        public void say() {
-            System.out.println("D");
+        public int say(int i) {
+            System.out.println("D" + i);
+            return i;
         }
     }
 
     @Extends({C.class, D.class, B.class})
-    static class E extends RootClass {
+    static class E implements IRoot {
+        @NotImplemented
         @Override
-        public void say() {
-            System.out.println("E");
+        public int say(int i) {
+//            System.out.println("E" + i);
+            return i;
         }
     }
 }
