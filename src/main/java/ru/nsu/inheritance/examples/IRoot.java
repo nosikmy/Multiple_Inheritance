@@ -1,8 +1,9 @@
 package ru.nsu.inheritance.examples;
 
-import ru.nsu.inheritance.RootInterface;
+import ru.nsu.inheritance.annotations.RootInterface;
 
 @RootInterface
 public interface IRoot {
-    void say();
+    int a(int i);
+    void b(int i);
 }

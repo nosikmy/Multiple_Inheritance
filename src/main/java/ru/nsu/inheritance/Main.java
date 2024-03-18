@@ -1,59 +1,84 @@
 package ru.nsu.inheritance;
 
+import ru.nsu.inheritance.annotations.Extends;
 import ru.nsu.inheritance.examples.IRoot;
 
-import java.lang.reflect.InvocationTargetException;
-
 public class Main {
-    public static void main(String[] args) throws InvocationTargetException, IllegalAccessException {
-//        RootInterfaceClass rootInterfaceClass = new RootInterfaceClass("ru.nsu.inheritance.examples");
-        E e = CallNextMethodGenerator.create(E.class);
-        e.say();
+    public static void main(String[] args) {
+        E e = MultipleInheritancer.create(E.class);
+//        e.adsa();
+//        int ans = e.a(1);
+//        System.out.println(ans);
+        e.b(1);
     }
 
-    static class RootClass implements IRoot {
+    static class A implements IRoot {
 
         @Override
-        public void say() {
-            System.out.println("Root");
+        public int a(int i) {
+            System.out.println("Method a from class A");
+            return 0;
+        }
+
+        @Override
+        public void b(int i) {
+            System.out.println("Method b from class A, value = " + i);
         }
     }
 
-    @Extends({RootClass.class})
-    static class A extends RootClass {
+    static class B implements IRoot {
         @Override
-        public void say() {
-            System.out.println("A");
+        public int a(int i) {
+            System.out.println("Method a from class B");
+            return 0;
+        }
+
+        @Override
+        public void b(int i) {
+            System.out.println("Method b from class B, value = " + i);
         }
     }
-    @Extends({RootClass.class})
-    static class B extends RootClass {
-        @Override
-        public void say() {
-            System.out.println("B");
-        }
-    }
+
     @Extends({A.class})
-    static class C extends RootClass {
+    static abstract class C implements IRoot {
+//        @Override
+//        public int a(int i) {
+//            System.out.println("Method a from class C");
+//            return 0;
+//        }
+
         @Override
-        public void say() {
-            System.out.println("C");
+        public void b(int i) {
+            System.out.println("Method b from class C, value = " + i);
         }
     }
 
     @Extends({A.class})
-    static class D extends RootClass {
+    static abstract class D implements IRoot {
+//        @NotImplemented
+//        @Override
+//        public int a(int i) {
+//            System.out.println("Method a from class D");
+//            return 0;
+//        }
+
         @Override
-        public void say() {
-            System.out.println("D");
+        public void b(int i) {
+            System.out.println("Method b from class D, value = " + i);
         }
     }
 
     @Extends({C.class, D.class, B.class})
-    static class E extends RootClass {
+    static abstract class E implements IRoot {
+//        @Override
+//        public int a(int i) {
+//            System.out.println("OVERRIDE Method a from class E");
+//            return 0;
+//        }
+
         @Override
-        public void say() {
-            System.out.println("E");
+        public boolean equals(Object obj) {
+            return super.equals(obj);
         }
     }
 }
