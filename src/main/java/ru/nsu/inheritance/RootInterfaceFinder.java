@@ -1,8 +1,6 @@
 package ru.nsu.inheritance;
 
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
+import ru.nsu.inheritance.annotations.RootInterface;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,6 +11,7 @@ import java.util.stream.Collectors;
 
 public class RootInterfaceFinder {
 
+    @SuppressWarnings("unchecked")
     protected static Class<?> findRootInterface(String packageName) {
         InputStream stream = null;
         BufferedReader reader = null;
