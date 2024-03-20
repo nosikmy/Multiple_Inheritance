@@ -4,6 +4,7 @@ import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import ru.nsu.inheritance.annotations.Extends;
+import ru.nsu.inheritance.annotations.RootInterface;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -31,6 +32,8 @@ import java.util.List;
  */
 public class MultipleInheritancer implements MethodInterceptor {
     private static boolean abstractFlag = false;
+    private static Class<?> rootInterface = null; // Возникает проблема, если у пользователя два дерева с разными RootInterface
+
 
     /**
      * Method to generate class bases on provided "clazz" with multiple inheritance possibility.
@@ -44,6 +47,21 @@ public class MultipleInheritancer implements MethodInterceptor {
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(clazz);
         enhancer.setCallback(new MultipleInheritancer());
+        if (!abstractFlag) {
+            rootInterface = null;
+            for (Class<?> i : clazz.getInterfaces()) {
+                if (i.getAnnotation(RootInterface.class) != null) {
+                    if (rootInterface != null) {
+                        throw new RuntimeException("The class has several root interfaces");
+                    } else {
+                        rootInterface = i;
+                    }
+                }
+            }
+            if (rootInterface == null) {
+                throw new RuntimeException("The class doesn't have a root interface");
+            }
+        }
         return (T) enhancer.create();
     }
 
@@ -140,6 +158,9 @@ public class MultipleInheritancer implements MethodInterceptor {
      */
     private static void addToQueue(Deque<Class<?>> queue, List<Class<?>> classes) {
         classes.forEach(cl -> {
+            if (Arrays.stream(cl.getInterfaces()).noneMatch(i -> i.getName().equals(rootInterface.getName()))) {
+                throw new RuntimeException("Parent class doesn't have a root interface");
+            }
             if (!queue.contains(cl)) {
                 queue.addLast(cl);
             }
