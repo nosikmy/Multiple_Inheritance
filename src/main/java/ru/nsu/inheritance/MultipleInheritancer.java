@@ -30,8 +30,6 @@ import java.util.List;
  * </p>
  */
 public class MultipleInheritancer implements MethodInterceptor {
-    private static final Deque<Class<?>> queue = new ArrayDeque<>();
-    private static Deque<Class<?>> resultingQueue = new ArrayDeque<>();
     private static boolean abstractFlag = false;
 
     /**
@@ -68,9 +66,9 @@ public class MultipleInheritancer implements MethodInterceptor {
             abstractFlag = false;
             return proxy.invokeSuper(obj, args);
         }
-        callNextMethod(obj, false);
+        Deque<Class<?>> resultingQueue = callNextMethod(obj, false);
 
-        if (queue.isEmpty() && !resultingQueue.isEmpty()) {
+        if (!resultingQueue.isEmpty()) {
             if (method.getReturnType().equals(void.class)) {
                 for (Class<?> c : resultingQueue) {
                     Method m = c.getMethod(method.getName(), method.getParameterTypes());
@@ -96,7 +94,6 @@ public class MultipleInheritancer implements MethodInterceptor {
                     }
                 }
             }
-            resultingQueue = new ArrayDeque<>();
         }
         return null;
     }
@@ -107,18 +104,19 @@ public class MultipleInheritancer implements MethodInterceptor {
      * @param obj         entry class
      * @param changeOrder if false -> more specific class comes first, otherwise - vice versa
      */
-    private static void callNextMethod(Object obj, boolean changeOrder) {
-        if (obj.getClass().getSuperclass().getAnnotation(Extends.class) == null) {
-            return;
-        }
+    private static Deque<Class<?>> callNextMethod(Object obj, boolean changeOrder) {
+        Deque<Class<?>> resultingQueue = new ArrayDeque<>();
+        Deque<Class<?>> queue = new ArrayDeque<>();
 
-        if (resultingQueue.isEmpty()) {
-            resultingQueue.addFirst(obj.getClass().getSuperclass());
+        if (obj.getClass().getSuperclass().getAnnotation(Extends.class) == null) {
+            return new ArrayDeque<>();
         }
+        resultingQueue.addFirst(obj.getClass().getSuperclass());
+
         List<Class<?>> extendsClasses =
                 Arrays.stream(obj.getClass().getSuperclass().getAnnotation(Extends.class).value()).toList();
 
-        addToQueue(extendsClasses);
+        addToQueue(queue, extendsClasses);
 
         while (!queue.isEmpty()) {
             Class<?> aClass = queue.pollFirst();
@@ -129,9 +127,10 @@ public class MultipleInheritancer implements MethodInterceptor {
             }
             if (aClass.getAnnotation(Extends.class) != null) {
                 extendsClasses = Arrays.stream(aClass.getAnnotation(Extends.class).value()).toList();
-                addToQueue(extendsClasses);
+                addToQueue(queue, extendsClasses);
             }
         }
+        return resultingQueue;
     }
 
     /**
@@ -139,7 +138,7 @@ public class MultipleInheritancer implements MethodInterceptor {
      *
      * @param classes classes to add
      */
-    private static void addToQueue(List<Class<?>> classes) {
+    private static void addToQueue(Deque<Class<?>> queue, List<Class<?>> classes) {
         classes.forEach(cl -> {
             if (!queue.contains(cl)) {
                 queue.addLast(cl);
