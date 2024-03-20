@@ -13,6 +13,7 @@ import java.io.PrintStream;
  * Multiple inheritance tests.
  */
 public class MultipleInheritanceTest {
+    // сделать больше тестов для разных случаев
     @Test
     public void testVoidMethod() {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -39,6 +40,12 @@ public class MultipleInheritanceTest {
         int actual = e.a(0);
         int expected = 2;
         Assertions.assertEquals(expected, actual);
+    }
+
+    public static void main(String[] args) {
+        F f = MultipleInheritancer.create(F.class);
+//        f.say();
+//        f.a(2);
     }
 
     /* Classes structure
@@ -107,6 +114,31 @@ public class MultipleInheritanceTest {
         public void b(int i) {
             int res = 5 + i;
             System.out.println("Eb " + res);
+        }
+
+        public void say() {
+            System.out.println("sdasd");
+        }
+    }
+
+    @Extends({C.class, D.class, B.class})
+    static abstract class F implements IRoot {
+        @Override
+        public void b(int i) {
+            int res = 5 + i;
+//            int res1 = a(2);
+//            System.out.println("Fb " + res + " " + res1);
+            System.out.println("Fb " + res);
+        }
+
+        @Override
+        public int a(int i) {
+            b(2);
+            return 0;
+        }
+
+        public void say() {
+            System.out.println("sdasd");
         }
     }
 }

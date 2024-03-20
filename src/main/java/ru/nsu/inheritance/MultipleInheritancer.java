@@ -32,7 +32,9 @@ import java.util.List;
  */
 public class MultipleInheritancer implements MethodInterceptor {
     private static boolean abstractFlag = false;
-    private static Class<?> rootInterface = null; // Возникает проблема, если у пользователя два дерева с разными RootInterface
+    private static Class<?> rootInterface = null;
+    // Возникает проблема, если у пользователя два дерева с разными RootInterface?
+    // Обработка исключений
 
 
     /**
@@ -80,6 +82,11 @@ public class MultipleInheritancer implements MethodInterceptor {
      */
     @Override
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
+        if (Arrays.stream(rootInterface.getDeclaredMethods()).
+                noneMatch(intMethod -> intMethod.getName().equals(method.getName()))) {
+            return proxy.invokeSuper(obj, args);
+        }
+
         if (abstractFlag) {
             abstractFlag = false;
             return proxy.invokeSuper(obj, args);

@@ -30,7 +30,7 @@ public class Main {
         @Override
         public int a(int i) {
             System.out.println("Method a from class B");
-            return 0;
+            return 4;
         }
 
         @Override
