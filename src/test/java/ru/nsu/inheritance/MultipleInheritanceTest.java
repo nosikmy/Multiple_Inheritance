@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import ru.nsu.inheritance.annotations.Extends;
 import ru.nsu.inheritance.examples.IRoot;
+import ru.nsu.inheritance.examples.TestIRoot;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -23,11 +24,17 @@ public class MultipleInheritanceTest {
             PrintStream stdOut = System.out;
 
             System.setOut(printStream);
-            e.b(2);
+            e.voidMethodForAllClasses(2);
             System.setOut(stdOut);
 
             String actual = outputStream.toString();
-            String expected = "Eb 7\r\n" + "Cb 5\r\n" + "Db 6\r\n" + "Bb 4\r\n" + "Ab 3\r\n";
+            String expected = """
+                    E: intMethodForAllClasses, parameter: 2\r
+                    C: intMethodForAllClasses, parameter: 2\r
+                    D: intMethodForAllClasses, parameter: 2\r
+                    B: intMethodForAllClasses, parameter: 2\r
+                    A: intMethodForAllClasses, parameter: 2\r
+                    """;
             Assertions.assertEquals(expected, actual);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -35,110 +42,142 @@ public class MultipleInheritanceTest {
     }
 
     @Test
-    void testIntMethod() {
-        E e = MultipleInheritancer.create(E.class);
-        int actual = e.a(0);
-        int expected = 2;
-        Assertions.assertEquals(expected, actual);
+    void testRootMethod() {
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+             PrintStream printStream = new PrintStream(outputStream)) {
+
+            E e = MultipleInheritancer.create(E.class);
+            PrintStream stdOut = System.out;
+
+            System.setOut(printStream);
+            Assertions.assertEquals(e.messageToA("Hello from E"), "Hello from A");
+            System.setOut(stdOut);
+            String actualOutput = outputStream.toString();
+            String expectedOutput = "A: rootMethod, parameter: Hello from E\r\n";
+            Assertions.assertEquals(expectedOutput, actualOutput);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public static void main(String[] args) {
-        F f = MultipleInheritancer.create(F.class);
-//        f.say();
+        E e = MultipleInheritancer.create(E.class);
+        e.a();
 //        f.a(2);
     }
 
     /* Classes structure
 
-           IRoot
-         /      \
-        A        B
-       / \      /
-      C   D    /
-      \   |   /
-       \  |  /
-        \ | /
-          E
+                                                                               IRoot
+                                                                             /      \
+                                voidMethodForAllClasses, messageToA, a -->  A        B <-- voidMethodForAllClasses, a, b
+                                                                           / \      /
+                                         voidMethodForAllClasses, b  -->  C   D  <-- voidMethodForAllClasses, a
+                                                                          \   |   /
+                                                                           \  |  /
+                                                                            \ | /
+                                           voidMethodForAllClasses, a, b --> E--F  <-- voidMethodForAllClasses, methodNotFromIRoot
     */
-    static class A implements IRoot {
+    static abstract class A implements TestIRoot {
+        private final String name = "A";
 
         @Override
-        public int a(int i) {
-            System.out.println("Method a from class A");
-            return 1 + i;
+        public void voidMethodForAllClasses(int i) {
+            System.out.println(name + ": intMethodForAllClasses, parameter: " + i);
         }
 
         @Override
-        public void b(int i) {
-            int res = 1 + i;
-            System.out.println("Ab " + res);
+        public String messageToA(String message) {
+            System.out.println(name + ": rootMethod, parameter: " + message);
+            return "Hello from " + name;
+        }
+
+        @Override
+        public void a(){
+            System.out.println("This method a() from A");
         }
     }
 
-    static class B implements IRoot {
+    static abstract class B implements TestIRoot {
+        private final String name = "B";
+
         @Override
-        public int a(int i) {
-            System.out.println("Method a from class B");
-            return 2 + i;
+        public void voidMethodForAllClasses(int i) {
+            System.out.println(name + ": intMethodForAllClasses, parameter: " + i);
         }
 
         @Override
-        public void b(int i) {
-            int res = 2 + i;
-            System.out.println("Bb " + res);
+        public void a(){
+            System.out.println("This method a() from B");
+        }
+
+        @Override
+        public void b(){
+            System.out.println("This method b() from B, Call a()");
+            a();
         }
     }
 
     @Extends({A.class})
-    static abstract class C implements IRoot {
+    static abstract class C implements TestIRoot {
+        private final String name = "C";
+
         @Override
-        public void b(int i) {
-            int res = 3 + i;
-            System.out.println("Cb " + res);
+        public void voidMethodForAllClasses(int i) {
+            System.out.println(name + ": intMethodForAllClasses, parameter: " + i);
+        }
+
+        @Override
+        public void b(){
+            System.out.println("This method b() from C, Call a()");
+            a();
         }
     }
 
     @Extends({A.class})
-    static abstract class D implements IRoot {
+    static abstract class D implements TestIRoot {
+        private final String name = "D";
 
         @Override
-        public void b(int i) {
-            int res = 4 + i;
-            System.out.println("Db " + res);
+        public void voidMethodForAllClasses(int i) {
+            System.out.println(name + ": intMethodForAllClasses, parameter: " + i);
+        }
+
+        @Override
+        public void a(){
+            System.out.println("This method a() from D");
         }
     }
 
     @Extends({C.class, D.class, B.class})
-    static abstract class E implements IRoot {
+    static abstract class E implements TestIRoot {
+        private final String name = "E";
+
         @Override
-        public void b(int i) {
-            int res = 5 + i;
-            System.out.println("Eb " + res);
+        public void voidMethodForAllClasses(int i) {
+            System.out.println(name + ": intMethodForAllClasses, parameter: " + i);
         }
 
-        public void say() {
-            System.out.println("sdasd");
+        @Override
+        public void a(){
+            System.out.println("This method a() from E, Call b()");
+            b();
+        }
+
+        @Override
+        public void b(){
+            System.out.println("This method b() from E");
         }
     }
 
     @Extends({C.class, D.class, B.class})
-    static abstract class F implements IRoot {
-        @Override
-        public void b(int i) {
-            int res = 5 + i;
-//            int res1 = a(2);
-//            System.out.println("Fb " + res + " " + res1);
-            System.out.println("Fb " + res);
-        }
+    static abstract class F implements TestIRoot {
+        private final String name = "F";
 
         @Override
-        public int a(int i) {
-            b(2);
-            return 0;
-        }
-
-        public void say() {
-            System.out.println("sdasd");
+        public void voidMethodForAllClasses(int i) {
+            System.out.println(name + ": intMethodForAllClasses, parameter: " + i);
         }
     }
 }
