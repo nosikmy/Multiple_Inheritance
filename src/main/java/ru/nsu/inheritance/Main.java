@@ -1,7 +1,6 @@
 package ru.nsu.inheritance;
 
 import ru.nsu.inheritance.annotations.Extends;
-import ru.nsu.inheritance.examples.IRoot;
 import ru.nsu.inheritance.examples.IRoot1;
 import ru.nsu.inheritance.examples.IRoot2;
 
@@ -28,6 +27,7 @@ public class Main {
         es.submit(() -> {
             g.c(3);
         });
+        es.shutdown();
     }
 
     static class FirstTree {
