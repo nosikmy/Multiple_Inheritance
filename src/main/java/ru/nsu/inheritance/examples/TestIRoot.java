@@ -6,6 +6,6 @@ import ru.nsu.inheritance.annotations.RootInterface;
 public interface TestIRoot {
     void voidMethodForAllClasses(int i);
     String messageToA(String message);
-    void a();
-    void b();
+    void a(String s);
+    void b(String s);
 }
