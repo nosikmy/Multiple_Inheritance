@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * Multiple inheritance tests.
  */
 public class MultipleInheritanceTest {
-    // сделать больше тестов для разных случаев
+    // TODO: тест с возвращаемым значением
     @Test
     public void testVoidMethod() {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
