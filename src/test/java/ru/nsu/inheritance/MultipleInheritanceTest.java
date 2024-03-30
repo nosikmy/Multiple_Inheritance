@@ -3,7 +3,6 @@ package ru.nsu.inheritance;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import ru.nsu.inheritance.annotations.Extends;
-import ru.nsu.inheritance.examples.IRoot;
 import ru.nsu.inheritance.examples.IRoot1;
 import ru.nsu.inheritance.examples.IRoot2;
 import ru.nsu.inheritance.examples.IRootWithoutAnnotation;
@@ -28,7 +27,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * Multiple inheritance tests.
  */
 public class MultipleInheritanceTest {
-    // TODO: тест с возвращаемым значением
+
+    /**
+     * Test on void method call.
+     */
     @Test
     public void testVoidMethod() {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -55,6 +57,10 @@ public class MultipleInheritanceTest {
         }
     }
 
+    /**
+     * In this test we check non-void method on returning value where method exists only in nearest to root class.
+     * So first of all we check that returning value matches with expected and then check what it should print.
+     */
     @Test
     void testRootMethod() {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -64,16 +70,22 @@ public class MultipleInheritanceTest {
             PrintStream stdOut = System.out;
 
             System.setOut(printStream);
+            // check returning value
             Assertions.assertEquals(e.messageToA("Hello from E"), "Hello from A");
             System.setOut(stdOut);
+
             String actualOutput = outputStream.toString();
             String expectedOutput = "A: rootMethod, parameter: Hello from E\r\n";
+            // check Println output
             Assertions.assertEquals(expectedOutput, actualOutput);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    /**
+     * Test to check void method calls inside another void methods.
+     */
     @Test
     void testCallEachOther() {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -105,6 +117,9 @@ public class MultipleInheritanceTest {
         }
     }
 
+    /**
+     * Test to check condition when class and his parents don't have requested method.
+     */
     @Test
     void testNoSuchMethodRealizationException() {
         FirstTree.A a = MultipleInheritancer.create(FirstTree.A.class);
@@ -113,6 +128,9 @@ public class MultipleInheritanceTest {
         });
     }
 
+    /**
+     * Test on condition where one class in the tree doesn't implement @RootInterface annotated interface.
+     */
     @Test
     void testNoRootInterfaceException() {
         BadTree.C c = MultipleInheritancer.create(BadTree.C.class);
@@ -121,6 +139,9 @@ public class MultipleInheritanceTest {
         });
     }
 
+    /**
+     * Test on condition where on class in the tree have several root interfaces.
+     */
     @Test
     void testSeveralRootInterfacesException() {
         SecondTree.B b = MultipleInheritancer.create(SecondTree.B.class);
@@ -129,8 +150,22 @@ public class MultipleInheritanceTest {
         });
     }
 
+    /**
+     * Test to check those conditions:
+     *
+     * <p>
+     * 1. It's possible to create two different (from different inheritance trees) instances of some classes
+     * and all calls will work;
+     * </p>
+     * <p>
+     * 2. Method calls for these instances will work in multithreading;
+     * </p>
+     * <p>
+     * 3. Abstract classes instances will work for all trees when they will be called simultaneously.
+     * </p>
+     */
     @Test
-    void testThreads() throws InterruptedException {
+    void testThreads() {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
              PrintStream printStream = new PrintStream(outputStream)) {
 
@@ -147,16 +182,16 @@ public class MultipleInheritanceTest {
             es.submit(() -> {
                 g.c(2);
             });
+            es.shutdown();
             es.awaitTermination(1, TimeUnit.SECONDS);
             System.setOut(stdOut);
             List<String> threads = Arrays.stream(outputStream.toString().split("\r\n")).toList();
             List<String> thread1 = new ArrayList<>();
             List<String> thread2 = new ArrayList<>();
-            for (String s : threads){
-                if(s.charAt(0) == '1'){
+            for (String s : threads) {
+                if (s.charAt(0) == '1') {
                     thread1.add(s);
-                }
-                else {
+                } else {
                     thread2.add(s);
                 }
             }
@@ -164,24 +199,11 @@ public class MultipleInheritanceTest {
             System.out.println(thread2);
             Assertions.assertEquals(List.of("1 Ca", "1 Aa", "1 Ba"), thread1);
             Assertions.assertEquals(List.of("2 Gc", "2 Dc", "2 Ec", "2 Fc"), thread2);
-            
-        } catch (IOException e) {
+
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
 
-    }
-
-    public static void main(String[] args) {
-        SecondTree.C c = MultipleInheritancer.create(SecondTree.C.class);
-        ThirdTree.G g = MultipleInheritancer.create(ThirdTree.G.class);
-        ExecutorService es = Executors.newFixedThreadPool(2);
-        es.submit(() -> {
-            c.a(4);
-        });
-        es.submit(() -> {
-            g.c(3);
-        });
-        es.shutdown();
     }
 
     static class FirstTree {
@@ -285,16 +307,6 @@ public class MultipleInheritanceTest {
             @Override
             public void b(String s) {
                 System.out.println(s + "This method b() from E");
-            }
-        }
-
-        @Extends({C.class, D.class, B.class})
-        static abstract class F implements TestIRoot {
-            private final String name = "F";
-
-            @Override
-            public void voidMethodForAllClasses(int i) {
-                System.out.println(name + ": intMethodForAllClasses, parameter: " + i);
             }
         }
     }
